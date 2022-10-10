@@ -4,6 +4,7 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.coroutines.awaitObjectResponse
 import com.github.kittinunf.fuel.serialization.kotlinxDeserializerOf
 import coroutines.workshop.common.logger
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import org.apache.commons.text.StringEscapeUtils
@@ -28,7 +29,20 @@ fun main() = runBlocking {
 
     val duration = measureTimeMillis {
 
-        logger.info(getHelloInLanguage("fr"))
+        val fr = async { getHelloInLanguage("fr") }
+        val de = async { getHelloInLanguage("de") }
+        val es = async { getHelloInLanguage("es") }
+        val en = async { getHelloInLanguage("en") }
+        val ru = async { getHelloInLanguage("ru") }
+
+        logger.info(
+            "\n{}: {}\n{}: {}\n{}: {}\n{}: {}\n{}: {}\n",
+            "fr", fr.await(),
+            "de", de.await(),
+            "es", es.await(),
+            "en", en.await(),
+            "ru", ru.await()
+        )
 
     }
 
@@ -40,7 +54,10 @@ fun main() = runBlocking {
 // also see https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Glossary:Language_codes
 suspend fun getHelloInLanguage(languageCode: String): String =
     StringEscapeUtils.unescapeHtml4(
-        Fuel.get("https://stefanbohacek.com/hellosalut/", listOf("lang" to languageCode)) // see https://stefanbohacek.com/project/hellosalut-api/
+        Fuel.get(
+            "https://stefanbohacek.com/hellosalut/",
+            listOf("lang" to languageCode)
+        ) // see https://stefanbohacek.com/project/hellosalut-api/
             .awaitObjectResponse(kotlinxDeserializerOf(HelloTranslation.serializer()))
             .third
             .hello

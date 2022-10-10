@@ -1,9 +1,10 @@
 package coroutines.workshop.exercise3
 
 import coroutines.workshop.common.logger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import kotlinx.coroutines.yield
 import kotlin.system.measureTimeMillis
 
 /*
@@ -36,25 +37,30 @@ fun main() {
     println("Calculation took $duration ms")
 }
 
-fun calculatePi() = runBlocking {
+fun calculatePi() = runBlocking(context = Dispatchers.Default) {
     // approximate pi up to 9 digits: up to 1_000_000_000 terms
-    val pi = sumLeibniz(0, 1_000_000_000) * 4
+
+    val pi = (0..10)
+        .map { async { sumLeibniz(it * 100_000_000L, (it + 1) * 100_000_000L - 1) } }
+        .sumOf { it.await() }
+        .times(4)
 
     println(pi) // (correct value of pi to 16 digits: 3.1415926535897932)
 }
 
-fun sumLeibniz(start: Long, end: Long): Double { // Leibniz series: 1 - 1/3 + 1/5 - 1/7 + 1/9 - .... ~ pi / 4
+suspend fun sumLeibniz(start: Long, end: Long): Double { // Leibniz series: 1 - 1/3 + 1/5 - 1/7 + 1/9 - .... ~ pi / 4
 
     logger.info("{} .. {}", start, end)
 
     var result = 0.0
     for (factor in start..end) {
         result += (if (factor % 2 == 0L) 1.0 else -1.0) / (1 + 2 * factor)
+        if (factor % 10_000L == 0L) yield()
     }
     return result
 }
 
-fun warmUp( ){
+fun warmUp() = runBlocking {
 
     repeat(5) {
         sumLeibniz(0, 1_000_000)

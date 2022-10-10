@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlin.coroutines.CoroutineContext
 
 fun main() = runBlocking {
 
@@ -16,7 +17,7 @@ fun main() = runBlocking {
 
     suspend fun two(): Int {
         println("Finding the question...")
-//        throw ArithmeticException()
+        throw ArithmeticException()
         delay(1_000)
         println("... asked!")
         return 1
@@ -25,10 +26,10 @@ fun main() = runBlocking {
     try {
         coroutineScope {
 
-            val een = async { one() }
-            val twee = async { two() }
+            val one = async { one() }
+            val two = async { two() }
 
-            println(een.await() + twee.await())
+            println(one.await() + two.await())
 
         }
     } catch (e: Exception) {

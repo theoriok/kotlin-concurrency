@@ -1,6 +1,7 @@
 package coroutines.workshop.exercise6
 
 import coroutines.workshop.common.logger
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -12,12 +13,14 @@ import org.slf4j.LoggerFactory
   Pay particular attention to the output of the Unconfined dispatcher.
  */
 
-fun main() = runBlocking {
-    for(i in 0..10) {
+fun main() = runBlocking(context = Dispatchers.IO) {
+    for (i in 0..10) {
         launch {
             logger.info("before delay in {}", i)
             delay(1000)
             logger.info("after delay in {}", i)
         }
     }
+    println("HELLO")
+    println("WORLD")
 }
